@@ -139,7 +139,7 @@ export default function DashboardPage() {
           </div>
           {myTasks.length === 0 ? (
             <div className="card" style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
-              🎉 No pending tasks! Great work.
+              No pending tasks! Great work.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
