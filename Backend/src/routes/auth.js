@@ -20,3 +20,4 @@ const handleSubmit = async (e) => {
     alert(err.message);
   }
 };
+module.exports = router;
