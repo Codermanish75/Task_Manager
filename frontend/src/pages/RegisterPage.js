@@ -1,109 +1,67 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const AuthContext = createContext();
+const RegisterPage = () => {
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
-const API_URL = process.env.REACT_APP_API_URL;
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  // Load user from token
-  useEffect(() => {
-    const token = localStorage.getItem('token');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-    if (token) {
-      fetch(`${API_URL}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(async (res) => {
-          if (!res.ok) throw new Error();
-          const data = await res.json();
-          setUser(data);
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-          setUser(null);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
+    if (formData.password !== formData.confirmPassword) {
+      return setError('Passwords do not match.');
+    }
+
+    setLoading(true);
+    try {
+      await register({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Registration failed.');
+    } finally {
       setLoading(false);
     }
-  }, []);
-
-  // Register
-  const register = async (formData) => {
-    const response = await fetch(
-      `${API_URL}/api/auth/register`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw { response: { data } };
-    }
-
-    localStorage.setItem('token', data.access);
-    setUser(data.user);
-
-    return data;
-  };
-
-  // Login
-  const login = async (credentials) => {
-    const response = await fetch(
-      `${API_URL}/api/auth/login`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw { response: { data } };
-    }
-
-    localStorage.setItem('token', data.access);
-    setUser(data.user);
-
-    return data;
-  };
-
-  // Logout
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        register,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <div style={{ maxWidth: 400, margin: '80px auto', padding: 24 }}>
+      <h2>Register</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <input name="first_name" placeholder="First Name" value={formData.first_name} onChange={handleChange} /><br />
+        <input name="last_name" placeholder="Last Name" value={formData.last_name} onChange={handleChange} /><br />
+        <input name="username" placeholder="Username" value={formData.username} onChange={handleChange} required /><br />
+        <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required /><br />
+        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required /><br />
+        <input name="confirmPassword" type="password" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} required /><br />
+        <button type="submit" disabled={loading}>{loading ? 'Registering...' : 'Register'}</button>
+      </form>
+      <p>Already have an account? <Link to="/login">Login</Link></p>
+    </div>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export default RegisterPage;
