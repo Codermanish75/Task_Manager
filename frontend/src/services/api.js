@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://task-manager-6tkt.onrender.com/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -21,7 +21,7 @@ API.interceptors.response.use(
       if (refresh) {
         try {
           const { data } = await axios.post(
-            `${process.env.REACT_APP_API_URL || 'http://localhost:8000/api'}/auth/refresh/`,
+            `${process.env.REACT_APP_API_URL || 'https://task-manager-6tkt.onrender.com/api'}/auth/refresh`,
             { refresh }
           );
           localStorage.setItem('access_token', data.access);
@@ -38,51 +38,51 @@ API.interceptors.response.use(
 );
 
 export const authAPI = {
-  register: (data) => API.post('/auth/register/', data),
-  login: (data) => API.post('/auth/login/', data),
-  logout: (refresh) => API.post('/auth/logout/', { refresh }),
-  me: () => API.get('/auth/me/'),
+  register: (data) => API.post('/auth/register', data),
+  login: (data) => API.post('/auth/login', data),
+  logout: (refresh) => API.post('/auth/logout', { refresh }),
+  me: () => API.get('/auth/me'),
 };
 
 export const projectsAPI = {
-  list: () => API.get('/projects/'),
-  get: (id) => API.get(`/projects/${id}/`),
-  create: (data) => API.post('/projects/', data),
-  update: (id, data) => API.put(`/projects/${id}/`, data),
-  delete: (id) => API.delete(`/projects/${id}/`),
-  stats: (id) => API.get(`/projects/${id}/stats/`),
+  list: () => API.get('/projects'),
+  get: (id) => API.get(`/projects/${id}`),
+  create: (data) => API.post('/projects', data),
+  update: (id, data) => API.put(`/projects/${id}`, data),
+  delete: (id) => API.delete(`/projects/${id}`),
+  stats: (id) => API.get(`/projects/${id}/stats`),
   addMember: (id, user_id, role = 'member') =>
-    API.post(`/projects/${id}/add_member/`, { user_id, role }),
+    API.post(`/projects/${id}/add_member`, { user_id, role }),
   removeMember: (id, user_id) =>
-    API.post(`/projects/${id}/remove_member/`, { user_id }),
+    API.post(`/projects/${id}/remove_member`, { user_id }),
   changeMemberRole: (id, user_id, role) =>
-    API.post(`/projects/${id}/change_member_role/`, { user_id, role }),
+    API.post(`/projects/${id}/change_member_role`, { user_id, role }),
 };
 
 export const tasksAPI = {
-  list: (params) => API.get('/tasks/', { params }),
-  get: (id) => API.get(`/tasks/${id}/`),
-  create: (data) => API.post('/tasks/', data),
-  update: (id, data) => API.put(`/tasks/${id}/`, data),
-  delete: (id) => API.delete(`/tasks/${id}/`),
+  list: (params) => API.get('/tasks', { params }),
+  get: (id) => API.get(`/tasks/${id}`),
+  create: (data) => API.post('/tasks', data),
+  update: (id, data) => API.put(`/tasks/${id}`, data),
+  delete: (id) => API.delete(`/tasks/${id}`),
 };
 
 export const commentsAPI = {
-  create: (data) => API.post('/comments/', data),
+  create: (data) => API.post('/comments', data),
 };
 
 export const usersAPI = {
-  list: () => API.get('/users/'),
-  setSystemRole: (id, system_role) => API.patch(`/users/${id}/system_role/`, { system_role }),
+  list: () => API.get('/users'),
+  setSystemRole: (id, system_role) => API.patch(`/users/${id}/system_role`, { system_role }),
 };
 
 export const dashboardAPI = {
-  stats: () => API.get('/dashboard/stats/'),
+  stats: () => API.get('/dashboard/stats'),
 };
 
 export const notificationsAPI = {
-  list: () => API.get('/notifications/'),
-  markRead: () => API.post('/notifications/read/'),
+  list: () => API.get('/notifications'),
+  markRead: () => API.post('/notifications/read'),
 };
 
 export default API;
